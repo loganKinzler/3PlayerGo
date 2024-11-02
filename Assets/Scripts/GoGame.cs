@@ -40,21 +40,24 @@ public class GoGame : MonoBehaviour
             // ADJACENT TILE IS ANOTHER PLAYER'S (NOT ENOUGH INFORMATION TO WORK WITH)
             if (surround.player != diamondToPlace.player) continue;
             
-            // ADJACENT TILE IS THE PLAYER'S (NEED TO CHECK IF PLACING CURRENT TILE WILL CAUSE THE GROUP TO BE TAKEN)
+            // ADJACENT TILE IS THE PLAYER'S (CHECK IF PLACING CURRENT TILE WILL CAUSE THE GROUP TO BE TAKEN)
             if (surround.player == diamondToPlace.player) {
 
                 // FULL GROUP IS SURROUNDED (GROUP WILL BE TAKEN)
                 FloodFillInfo floodFromSurround = FloodFill(surround);
                 if (floodFromSurround.completelySurrounded) {
                     diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-                    return true;
+                    return false;
                 }
+                
+                // AN EMPTY SPACE SOMEWHERE (GROUP IS FINE)
+                diamondToPlace.player = prevDiamondPlayer;// RESET DtP
+                return true;
             }
         }
         
-        diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-
         // CORNER CASE (PLACED IN CORNER ALONE, BUT SURROUNDED [WILL GET TAKEN])
+        diamondToPlace.player = prevDiamondPlayer;// RESET DtP
         return false;
     }
 
@@ -67,24 +70,24 @@ public class GoGame : MonoBehaviour
         int scoreAddition = 1;
 
         List<Diamond> surrounding = GetSurrounding(diamond);
-        for (int s=0; s<surrounding.Count; s++) {
-            
-            // TILE IS EMPTY OR PLAYER'S (DO NOTHING [VAIDATION ALREAYD RAN, SO NO ISSUES WITH CAPTURING])
-            if (surrounding[s].player == diamond.player || surrounding[s].player == 0) continue;
-            FloodFillInfo floodInfo = FloodFill(surrounding[s]);
+        foreach (Diamond surround in surrounding) {
 
-            if (floodInfo.previouslySearched.Count != 0) print("THANK GOD");
+            // TILE IS EMPTY OR PLAYER'S (DO NOTHING [VAIDATION ALREAYD RAN, SO NO ISSUES WITH CAPTURING SELF])
+            if (surround.player == diamond.player || surround.player == 0) continue;
+            FloodFillInfo floodInfo = FloodFill(surround);
 
-            // GROUP IS ENCLOSED (REMOVE IT)
-            if (floodInfo.completelySurrounded)
-                for (int f=0; f<floodInfo.previouslySearched.Count; f++)
-                    floodInfo.previouslySearched[f].PlaceDiamond(0);
+            // GROUP IS NOT ENCLOSED (DO NOTHING)
+            if (!floodInfo.completelySurrounded) continue;
+
+            // REMOVE THE ENCLOSED GROUP
+            for (int f=0; f<floodInfo.previouslySearched.Count; f++)
+                floodInfo.previouslySearched[f].PlaceDiamond(0);
             
             // ADD TAKEN TILES TO PLAYER'S SCORE
             scoreAddition += floodInfo.previouslySearched.Count;
 
             // REMOVE SCORE OF TAKEN TILES
-            switch (surrounding[s].player) {
+            switch (surround.player) {
                 case 1:
                     player1score -= scoreAddition;
                 break;
@@ -96,7 +99,7 @@ public class GoGame : MonoBehaviour
                 case 3:
                     player3score -= scoreAddition;
                 break;
-            }   
+            }
         }
 
         // ADD SCORE TO CORRECT PLAYER
@@ -119,7 +122,7 @@ public class GoGame : MonoBehaviour
 
     public void IteratePlayer() {
         player++;
-        player = player%3 + 1;
+        player = (player>3)? 1:player;
     }
 
     public FloodFillInfo FloodFill(Diamond startingDiamond) {
@@ -131,9 +134,9 @@ public class GoGame : MonoBehaviour
         FFinfo.completelySurrounded = false;
 
         int iter = 0;
-        int MAX_ITERS = 10_000;
+        int MAX_ITERS = 10000;
         while (!FFinfo.completelySurrounded && iter < MAX_ITERS) {
-            RemovePreviouslySearched(FFinfo.previouslySearched, FFinfo.surrounding);
+            RemoveEmptySurrounding(FFinfo.previouslySearched, FFinfo.surrounding);
             iter++;
 
             for (int ds=FFinfo.surrounding.Count-1; ds>=0; ds--) {
@@ -145,7 +148,6 @@ public class GoGame : MonoBehaviour
                 // SAME PLAYER (THERE STILL IS MORE TO EXPAND TO)
                 if (FFinfo.surrounding[ds].player == FFinfo.player) {
                     FFinfo.completelySurrounded = false;// RESET SO ALG DOESN'T END EARLY
-                    print("Same player is adjacent");
                     continue;
                 }
 
@@ -169,7 +171,7 @@ public class GoGame : MonoBehaviour
         return FFinfo;
     }
 
-    public void RemovePreviouslySearched(List<Diamond> previouslySearched, List<Diamond> surroundingList) {
+    public void RemoveEmptySurrounding(List<Diamond> previouslySearched, List<Diamond> surroundingList) {
         for (int sd=surroundingList.Count-1; sd>=0; sd--) {
             if (!previouslySearched.Contains(surroundingList[sd])) {surroundingList.RemoveAt(sd); continue;}
         }
@@ -192,14 +194,14 @@ public class GoGame : MonoBehaviour
                 new Vector3(startingPosition.x, startingPosition.y, 0),
                 new Vector3(startingPosition.x, startingPosition.y, 2),
                 new Vector3(startingPosition.x, startingPosition.y+1, 2),
-                new Vector3(startingPosition.x+1, startingPosition.y+1, 1)
+                new Vector3(startingPosition.x-1, startingPosition.y+1, 0)
             }; break;
 
             case 2: surrounding = new Vector3[4]{
                 new Vector3(startingPosition.x, startingPosition.y, 0),
                 new Vector3(startingPosition.x, startingPosition.y, 1),
                 new Vector3(startingPosition.x, startingPosition.y-1, 1),
-                new Vector3(startingPosition.x-1, startingPosition.y, 1)
+                new Vector3(startingPosition.x-1, startingPosition.y, 0)
             }; break;
         }
         

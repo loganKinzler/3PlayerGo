@@ -62,6 +62,7 @@ public class PlayerClicker : MonoBehaviour
             GameObject diamondObject = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
                 clickedHexPosition.x, clickedHexPosition.y, clickedHexPosition.z));
             
+            if (diamondObject == null) return null;
             return diamondObject.GetComponent<Diamond>();
         }
 
@@ -72,7 +73,7 @@ public class PlayerClicker : MonoBehaviour
         if (mouseButton != 0) return;
         Diamond clickedDiamond = GetClickedDiamond();
 
-        if (validationRequest == null) return;
+        if (validationRequest == null || clickedDiamond == null) return;
 
         if (!validationRequest(clickedDiamond)) {
             if (validationFail == null) return;
