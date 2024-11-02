@@ -51,7 +51,7 @@ MonoBehaviour:
   player1SpriteSheet: {fileID: 2100000, guid: b153175d13c8b5c4ea7694e7fe4018af, type: 2}
   player2SpriteSheet: {fileID: 2100000, guid: b27d2ee51cdabdc4e8b8e3575ab2648a, type: 2}
   player3SpriteSheet: {fileID: 2100000, guid: 735c9e50d3876c44893c5fe414366261, type: 2}
-  nullSprite: {fileID: 2100000, guid: 94b25e564f1d0204182f6713f5cad65f, type: 2}
+  nullSprite: {fileID: 2100000, guid: f2f59f8893a8c3943bad7b16dda0b499, type: 2}
 --- !u!23 &3134002938201376707
 MeshRenderer:
   m_ObjectHideFlags: 0
