@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class PlayerClicker : MonoBehaviour
 {
-    public GoGame GameScript;
     private float clickDelay = 0.1f;
     private bool clickDebounce = false;
-    private int testPlayer = 1;// TESTING VALUE
+    private int testPlayer = 1;
 
 
     private delegate void ClickDelegate(int mouseButton);

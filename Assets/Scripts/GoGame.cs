@@ -14,8 +14,8 @@ public class GoGame : MonoBehaviour
 
     void Start()
     {
-        GameObject.Find("Square").GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
-        GameObject.Find("Square").GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
+        GameObject.Find("Background").GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
+        GameObject.Find("Background").GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
     }
 
     public bool ValidatePlacement(Diamond diamondToPlace) {
@@ -133,9 +133,13 @@ public class GoGame : MonoBehaviour
         FFinfo.previouslySearched = new List<Diamond>(){startingDiamond};
         FFinfo.surrounding = GetSurrounding(startingDiamond);
 
+        int limit = 100;
+        int iter = 0;
+
         bool hasExpanded = true;
-        while (hasExpanded) {
+        while (hasExpanded && iter < limit) {
             hasExpanded = false;
+            iter++;
 
             for (int sd=FFinfo.surrounding.Count-1; sd>=0; sd--) {
                 
@@ -152,7 +156,6 @@ public class GoGame : MonoBehaviour
 
                 // REMOVE THE TILE THAT WAS EXPANDED OFF OF & ADD NEW EXPANSION
                 FFinfo.previouslySearched.Add(FFinfo.surrounding[sd]);
-                FFinfo.surrounding.RemoveAt(sd);
                 FFinfo.surrounding.AddRange<Diamond>(expansion);
             }
         }
@@ -162,7 +165,7 @@ public class GoGame : MonoBehaviour
 
     public bool GroupIsCompletelySurrounded(List<Diamond> surroundsGroup) {
         foreach (Diamond diamond in surroundsGroup)
-            if (diamond.player == 0) {print("Not Surrounded"); return false;}
+            if (diamond.player == 0) return false;
         return true;
     }
 
@@ -195,11 +198,13 @@ public class GoGame : MonoBehaviour
         }
         
         foreach (Vector3 surround in surrounding) {
+            if (GameObject.Find(string.Format("Diamond:({0},{1},{2})",
+                surround.x, surround.y, surround.z)).GetComponent<Diamond>() == null)
+                    continue;
+                    
             Diamond surroundingDiamond = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
                 surround.x, surround.y, surround.z)).GetComponent<Diamond>();
             
-            // DIAMOND IS OUT OF BOUNDS
-            if (surroundingDiamond == null) continue;
             surroundingDiamonds.Add(surroundingDiamond);
         }
 
