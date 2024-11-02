@@ -191,7 +191,7 @@ SpriteRenderer:
   m_Size: {x: 2.22, y: 1.28}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &156911086
@@ -266,6 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19507c1812bbf074a84cf8b8e0fee0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameScript: {fileID: 0}
 --- !u!50 &156911089
 Rigidbody2D:
   serializedVersion: 4
@@ -397,6 +398,7 @@ GameObject:
   - component: {fileID: 1547849180}
   - component: {fileID: 1547849182}
   - component: {fileID: 1547849183}
+  - component: {fileID: 1547849184}
   m_Layer: 0
   m_Name: DiamondGrid
   m_TagString: Untagged
@@ -443,6 +445,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19507c1812bbf074a84cf8b8e0fee0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameScript: {fileID: 0}
 --- !u!114 &1547849183
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -456,7 +459,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   diamond: {fileID: 3162658721972350475, guid: ef463e92d9c6bd74eaf91bc05388fa04, type: 3}
-  gridSize: 5
+  gridSize: 6
+--- !u!114 &1547849184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547849179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680e94e5c4b557e40b912cec86eabbf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: 1
+  player1score: 0
+  player2score: 0
+  player3score: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

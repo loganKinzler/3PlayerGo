@@ -1,68 +1,103 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerClicker : MonoBehaviour
 {
+    public GoGame GameScript;
     private float clickDelay = 0.1f;
     private bool clickDebounce = false;
+    private int testPlayer = 1;// TESTING VALUE
 
-    private int player = 1;
 
+    private delegate void ClickDelegate(int mouseButton);
+    private ClickDelegate clickMethod;
+
+    public delegate bool ClickValidationRequest(Diamond diamond);
+    public event ClickValidationRequest validationRequest;
+
+    public delegate void ValidationFalure(Diamond diamond);
+    public event ValidationFalure validationFail;
+
+    public delegate void ClickProccesser(Diamond diamond);
+    public event ClickProccesser clickProccesser;
+
+    void Start()
+    {
+        clickMethod = GameActual;
+    }
 
     void Update()
     {
         if (Input.GetMouseButtonUp(0) && !clickDebounce) {
             clickDebounce = true;
-            StartCoroutine(MouseCoroutine(0));
+            StartCoroutine(MouseCoroutine(0, clickMethod));
         }
 
         else if (Input.GetMouseButtonUp(1) && !clickDebounce) {
             clickDebounce = true;
-            StartCoroutine(MouseCoroutine(1));
+            StartCoroutine(MouseCoroutine(1, clickMethod));
         }
 
         else if (Input.GetMouseButtonUp(2) && !clickDebounce) {
             clickDebounce = true;
-            StartCoroutine(MouseCoroutine(2));
+            StartCoroutine(MouseCoroutine(2, clickMethod));
         }
     }
 
 
     // MOUSE METHODS
-    private IEnumerator MouseCoroutine(int mouseButton) {
-        MouseTesting(mouseButton);
+    private IEnumerator MouseCoroutine(int mouseButton, ClickDelegate clickDelegate) {
+        clickDelegate(mouseButton);
 
         yield return new WaitForSeconds(clickDelay);
         clickDebounce = false;
     }
 
-    private void MouseClick(int playerClick) {
+    private Diamond GetClickedDiamond() {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
         if(hit.collider != null) {
             Vector3 clickedHexPosition = HexPositionFromEuclidean(hit.point);
-            GameObject diamond = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
+            GameObject diamondObject = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
                 clickedHexPosition.x, clickedHexPosition.y, clickedHexPosition.z));
             
-            if (diamond != null) diamond.GetComponent<Diamond>().PlaceDiamond(playerClick);
+            return diamondObject.GetComponent<Diamond>();
         }
+
+        return null;
     }
 
-    private void MouseTesting(int mouseButton) {
+    private void GameActual(int mouseButton) {
+        if (mouseButton != 0) return;
+        Diamond clickedDiamond = GetClickedDiamond();
+
+        if (validationRequest == null) return;
+
+        if (!validationRequest(clickedDiamond)) {
+            if (validationFail == null) return;
+            validationFail(clickedDiamond);
+        }
+
+        if (clickProccesser == null) return;
+        clickProccesser(clickedDiamond);
+    }
+
+    private void GameTesting(int mouseButton) {
+        Diamond clickedDiamond = GetClickedDiamond();
+
         switch (mouseButton) {
             case 0:
-                MouseClick(player);
+                clickedDiamond.PlaceDiamond(testPlayer);
             break;
 
             case 1:
-                MouseClick(0);
+                clickedDiamond.PlaceDiamond(0);
             break;
 
-            case 2:
-                player++;
-                player = (player>3)? 1:player;
+            case 2:                
+                testPlayer++;
+                testPlayer = (testPlayer>3)? 1:testPlayer;
             break;
         }
     }

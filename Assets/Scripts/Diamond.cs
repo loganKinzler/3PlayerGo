@@ -40,16 +40,17 @@ public class Diamond : MonoBehaviour
         CreateDiamondMesh();
     }
 
+    public Vector3 GetPosition() {return diamondPosition;}
 
     public void SetPosition(int x, int y, int z) {
-        z %= 3;
+        z %= 4;
         diamondPosition.Set(x, y, z);
         transform.position = GetEuclideanPosition(diamondPosition);
         transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * GetEuclideanRotation(diamondPosition));
     }
 
     public void SetPosition(Vector3 newPosition) {
-        newPosition.z %= 3;
+        newPosition.z %= 4;
         diamondPosition.Set(newPosition.x, newPosition.y, newPosition.z);
         transform.position = GetEuclideanPosition(newPosition);
         transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * GetEuclideanRotation(newPosition));
@@ -147,10 +148,6 @@ public class Diamond : MonoBehaviour
     // GRID METHODS
     public float GetEuclideanRotation(Vector3 diamondVector) {
         return (float) Math.PI * 2f/3f * diamondVector.z;
-    }
-
-    public Vector3 GetHexPosition() {
-        return diamondPosition;
     }
 
     public Vector2 GetEuclideanPosition(Vector3 diamondVector) {

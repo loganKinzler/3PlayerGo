@@ -32,6 +32,6 @@ public class DiamondGridGenerator : MonoBehaviour
     }
 
     public float GetDiamondSize() {
-        return 0.5f;// SCALE DIAMONDS S THEY FIT ON SCREEN
-    } 
+        return 0.5f;// SCALE DIAMONDS S THEY FIT ON SCREEN (LATER)
+    }
 }
