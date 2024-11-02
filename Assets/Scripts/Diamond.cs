@@ -8,10 +8,10 @@ public class Diamond : MonoBehaviour
 
     // DIAMOND VARS
     public int player = 0;
-    public Material player1SpriteSheet;
-    public Material player2SpriteSheet;
-    public Material player3SpriteSheet;
-    public Material nullSprite;
+    public Texture player1SpriteSheet;
+    public Texture player2SpriteSheet;
+    public Texture player3SpriteSheet;
+    public Texture nullSprite;
 
     private Vector3 diamondPosition = new Vector3(0,0,0);
 
@@ -61,28 +61,20 @@ public class Diamond : MonoBehaviour
 
         switch (player) {
             case 0:
-                gameObject.GetComponent<MeshRenderer>().SetMaterials(new System.Collections.Generic.List<Material>(new Material[]{
-                    nullSprite
-                }));
+                GetComponent<MeshRenderer>().material.mainTexture = nullSprite;
             break;
 
             case 1:
-                gameObject.GetComponent<MeshRenderer>().SetMaterials(new System.Collections.Generic.List<Material>(new Material[]{
-                    player1SpriteSheet
-                }));
-            break;
+                GetComponent<MeshRenderer>().material.mainTexture = player1SpriteSheet;
+                break;
 
             case 2:
-                gameObject.GetComponent<MeshRenderer>().SetMaterials(new System.Collections.Generic.List<Material>(new Material[]{
-                    player2SpriteSheet
-                }));
-            break;
+                GetComponent<MeshRenderer>().material.mainTexture = player2SpriteSheet;
+                break;
 
             case 3:
-                gameObject.GetComponent<MeshRenderer>().SetMaterials(new System.Collections.Generic.List<Material>(new Material[]{
-                    player3SpriteSheet
-                }));
-            break;
+                GetComponent<MeshRenderer>().material.mainTexture = player3SpriteSheet;
+                break;
         }
     }
 
