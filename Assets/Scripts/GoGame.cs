@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GoGame : MonoBehaviour
@@ -45,7 +46,7 @@ public class GoGame : MonoBehaviour
 
                 // FULL GROUP IS SURROUNDED (GROUP WILL BE TAKEN)
                 FloodFillInfo floodFromSurround = FloodFill(surround);
-                if (floodFromSurround.completelySurrounded) {
+                if (GroupIsCompletelySurrounded(floodFromSurround.surrounding)) {
                     diamondToPlace.player = prevDiamondPlayer;// RESET DtP
                     return false;
                 }
@@ -77,11 +78,11 @@ public class GoGame : MonoBehaviour
             FloodFillInfo floodInfo = FloodFill(surround);
 
             // GROUP IS NOT ENCLOSED (DO NOTHING)
-            if (!floodInfo.completelySurrounded) continue;
+            if (!GroupIsCompletelySurrounded(floodInfo.surrounding)) continue;
 
             // REMOVE THE ENCLOSED GROUP
-            for (int f=0; f<floodInfo.previouslySearched.Count; f++)
-                floodInfo.previouslySearched[f].PlaceDiamond(0);
+            foreach (Diamond floodedDiamond in floodInfo.previouslySearched)
+                floodedDiamond.PlaceDiamond(0);
             
             // ADD TAKEN TILES TO PLAYER'S SCORE
             scoreAddition += floodInfo.previouslySearched.Count;
@@ -129,52 +130,40 @@ public class GoGame : MonoBehaviour
 
         FloodFillInfo FFinfo = ScriptableObject.CreateInstance<FloodFillInfo>();
         FFinfo.player = startingDiamond.player;
-        FFinfo.previouslySearched = new List<Diamond>();
+        FFinfo.previouslySearched = new List<Diamond>(){startingDiamond};
         FFinfo.surrounding = GetSurrounding(startingDiamond);
-        FFinfo.completelySurrounded = false;
 
-        int iter = 0;
-        int MAX_ITERS = 10000;
-        while (!FFinfo.completelySurrounded && iter < MAX_ITERS) {
-            RemoveEmptySurrounding(FFinfo.previouslySearched, FFinfo.surrounding);
-            iter++;
+        bool hasExpanded = true;
+        while (hasExpanded) {
+            hasExpanded = false;
 
-            for (int ds=FFinfo.surrounding.Count-1; ds>=0; ds--) {
+            for (int sd=FFinfo.surrounding.Count-1; sd>=0; sd--) {
+                
+                // WALL IS FORMED
+                if (FFinfo.surrounding[sd].player != FFinfo.player) continue;
+                hasExpanded = true;
 
-                // EMPTY SPACE (THERE'S NOTHING THAT NEEDS TO BE DONE [NO POSSIBLE WAY TO TAKE THE GROUP] )
-                if (FFinfo.surrounding[ds].player == 0) return FFinfo;
-                FFinfo.completelySurrounded = true;// IF THERE IS NO SURROUNDING PLAYER TILES, IT'S FINISHED
-
-                // SAME PLAYER (THERE STILL IS MORE TO EXPAND TO)
-                if (FFinfo.surrounding[ds].player == FFinfo.player) {
-                    FFinfo.completelySurrounded = false;// RESET SO ALG DOESN'T END EARLY
-                    continue;
+                // EXPAND WHERE IT CAN
+                List<Diamond> expansion = GetSurrounding(FFinfo.surrounding[sd]);
+                for (int ed=expansion.Count-1; ed>=0; ed--) {
+                    if (!FFinfo.previouslySearched.Contains(expansion[ed]) && !FFinfo.surrounding.Contains(expansion[ed])) continue;
+                    expansion.RemoveAt(ed);
                 }
 
-                // NON-PLAYER (REMOVE THEM, SO THEY DON'T GET EXPANDED INTO)    
-                FFinfo.surrounding.RemoveAt(ds);
-
-                // STOP POTENTAIL INFINITE LOOPS
-                if (FFinfo.surrounding.Count == 0) return FFinfo;
+                // REMOVE THE TILE THAT WAS EXPANDED OFF OF & ADD NEW EXPANSION
+                FFinfo.previouslySearched.Add(FFinfo.surrounding[sd]);
+                FFinfo.surrounding.RemoveAt(sd);
+                FFinfo.surrounding.AddRange<Diamond>(expansion);
             }
-
-            // SET UP FOR NEXT ITERATION:
-            // ADD SURROUNDING
-            FFinfo.previouslySearched.AddRange(FFinfo.surrounding);
-
-            // CREATE NEW SURROUNDING
-            List<Diamond> newSurrounding = new List<Diamond>();
-            foreach (Diamond surround in FFinfo.surrounding)
-                newSurrounding.AddRange(GetSurrounding(surround));
         }
 
         return FFinfo;
     }
 
-    public void RemoveEmptySurrounding(List<Diamond> previouslySearched, List<Diamond> surroundingList) {
-        for (int sd=surroundingList.Count-1; sd>=0; sd--) {
-            if (!previouslySearched.Contains(surroundingList[sd])) {surroundingList.RemoveAt(sd); continue;}
-        }
+    public bool GroupIsCompletelySurrounded(List<Diamond> surroundsGroup) {
+        foreach (Diamond diamond in surroundsGroup)
+            if (diamond.player == 0) {print("Not Surrounded"); return false;}
+        return true;
     }
 
     public List<Diamond> GetSurrounding(Diamond diamond) {

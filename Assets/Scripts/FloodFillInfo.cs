@@ -7,5 +7,4 @@ public class FloodFillInfo : ScriptableObject
     public int player;
     public List<Diamond> previouslySearched;
     public List<Diamond> surrounding;
-    public bool completelySurrounded;
 }
