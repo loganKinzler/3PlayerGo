@@ -378,6 +378,10 @@ public class GoGame : MonoBehaviour
         player1score = 0;
         player2score = 0;
         player3score = 0;
+        player1Passed = false;
+        player2Passed = false;
+        player3Passed = false;
+
         scoreChart.CreatePieChart(0, 0, 0);
 
         // Allow for input
