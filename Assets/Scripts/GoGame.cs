@@ -13,14 +13,20 @@ public class GoGame : MonoBehaviour
     public int player2score = 0;
     public int player3score = 0;
 
+    public bool player1Passed = false;
+    public bool player2Passed = false;
+    public bool player3Passed = false;
+
     public bool gameStarted = false;
     public int turnCount = 0;
 
     DiamondGridGenerator diamondGrid;
+    UIManager ui;
 
     void Start()
     {
         diamondGrid = FindObjectOfType<DiamondGridGenerator>();
+        ui = FindObjectOfType<UIManager>();
     }
 
     public bool ValidatePlacement(Diamond diamondToPlace) 
@@ -39,7 +45,7 @@ public class GoGame : MonoBehaviour
             return true;
 
         // TILE GROUP CAPTURED
-        FloodFillEmptyResult result = FloodFillEmpty(diamondToPlace);
+        FloodFillEmptyResult result = FloodFillEmpty(diamondToPlace, false);
         if (result != null && !result.PlayerCanPlace(player))
             return false;
 
@@ -58,7 +64,7 @@ public class GoGame : MonoBehaviour
     }
 
     // Run flood fill on a group of empty diamonds and get the surrounding diamonds
-    public FloodFillEmptyResult FloodFillEmpty(Diamond startingDiamond)
+    public FloodFillEmptyResult FloodFillEmpty(Diamond startingDiamond, bool forceFinish)
     {
         if (turnCount < 4) // Earliest turn a piece can be captured
             return null;
@@ -70,6 +76,8 @@ public class GoGame : MonoBehaviour
         List<Diamond> surroundingDiamonds = new List<Diamond>();
         List<int> playersInBorder = new List<int>();
         List<Diamond> diamondsChecked = new List<Diamond>();
+
+        bool enclosed = true;
 
         Queue<Diamond> checkQueue = new Queue<Diamond>();
         checkQueue.Enqueue(startingDiamond);
@@ -91,7 +99,12 @@ public class GoGame : MonoBehaviour
 
                 // Check if group contains all 3 players. If so, it is not enclosed -> return
                 if (playersInBorder.Count >= 3)
-                    return new FloodFillEmptyResult(false);
+                {
+                    if (forceFinish)
+                        enclosed = false;
+                    else
+                        return new FloodFillEmptyResult(false);
+                }
 
                 // Add to surrounding
                 surroundingDiamonds.Add(diamond);
@@ -113,7 +126,7 @@ public class GoGame : MonoBehaviour
             }
         }
 
-        return new FloodFillEmptyResult(true, group, surroundingDiamonds);
+        return new FloodFillEmptyResult(enclosed, group, surroundingDiamonds);
     }
 
     // Run flood fill on a group of a player's diamonds to see if it's captuerd
@@ -230,11 +243,22 @@ public class GoGame : MonoBehaviour
                 // Empty spaces scored differently
                 case 0:
                     // Add score based on empty pieces owned by player
-                    FloodFillEmptyResult result = FloodFillEmpty(diamond);
-                    if (result == null || !result.enclosed)
+                    FloodFillEmptyResult result = FloodFillEmpty(diamond, true);
+                    if (result == null)
                     {
                         if (diamond.playerOwned != 0)
                             diamond.PlaceDiamond(0, 0, turnCount);
+                        continue;
+                    }
+                    else if (!result.enclosed)
+                    {
+
+                        if (diamond.playerOwned != 0)
+                            diamond.PlaceDiamond(0, 0, turnCount);
+
+                        // Add all empty pieces to checked list
+                        foreach (Diamond d in result.emptyDiamonds)
+                            diamondsChecked.Add(d);
                         continue;
                     }
 
@@ -261,12 +285,26 @@ public class GoGame : MonoBehaviour
         }
     }
 
-    public void IteratePlayer() {
+    public void IteratePlayer() 
+    {
+        // TODO: End game if all players passed
+        if (player1Passed && player2Passed && player3Passed)
+            Debug.Log("Game over");
+
         player++;
         turnCount++;
         player = (player>3)? 1:player;
 
         scoreChart.CreatePieChart(player1score, player2score, player3score);
+
+        if (player == 1)
+            player1Passed = false;
+        else if (player == 2)
+            player2Passed = false;
+        else if (player == 3)
+            player3Passed = false;
+
+        ui.NewTurn(player);
     }
 
     public List<Diamond> GetSurrounding(Diamond diamond) {
@@ -326,5 +364,23 @@ public class GoGame : MonoBehaviour
 
         // Allow for input
         gameStarted = true;
+    }
+
+    public void PassPlayer()
+    {
+        switch (player)
+        {
+            case 1:
+                player1Passed = true;
+                break;
+            case 2:
+                player2Passed = true;
+                break;
+            case 3:
+                player3Passed = true;
+                break;
+        }
+
+        IteratePlayer();
     }
 }
