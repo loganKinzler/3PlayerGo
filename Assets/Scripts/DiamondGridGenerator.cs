@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DiamondGridGenerator : MonoBehaviour
 {
-    public GameObject diamond;
+    public Diamond diamond;
     public int gridSize = 5;
+    public Dictionary<Vector3Int, Diamond> diamonds = new Dictionary<Vector3Int, Diamond>();
 
     void Start()
     {
@@ -24,11 +26,12 @@ public class DiamondGridGenerator : MonoBehaviour
     }
 
     void PlaceDiamond(int x, int y, int z) {
-        GameObject diamondClone = Instantiate(diamond);
+        Diamond diamondClone = Instantiate(diamond);
         diamondClone.name = string.Format("Diamond:({0},{1},{2})", x, y, z);
         diamondClone.transform.SetParent(gameObject.transform);
         diamondClone.transform.localScale = Vector3.one * GetDiamondSize();
-        diamondClone.GetComponent<Diamond>().InstantiateDiamond(x, y, z);
+        diamondClone.InstantiateDiamond(x, y, z);
+        diamonds[new Vector3Int(x, y, z)] = diamondClone;
     }
 
     public float GetDiamondSize() {

@@ -21,8 +21,12 @@ public class PlayerClicker : MonoBehaviour
     public delegate void ClickProccesser(Diamond diamond);
     public event ClickProccesser clickProccesser;
 
+    DiamondGridGenerator diamondGrid;
+
     void Start()
     {
+        diamondGrid = FindObjectOfType<DiamondGridGenerator>();
+
         clickMethod = GameActual;
     }
 
@@ -58,10 +62,12 @@ public class PlayerClicker : MonoBehaviour
 
         if(hit.collider != null) {
             Vector3 clickedHexPosition = HexPositionFromEuclidean(hit.point);
-            GameObject diamondObject = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
-                clickedHexPosition.x, clickedHexPosition.y, clickedHexPosition.z));
             
-            if (diamondObject == null) return null;
+            if (!diamondGrid.diamonds.TryGetValue(new Vector3Int(
+                (int)clickedHexPosition.x,
+                (int)clickedHexPosition.y,
+                (int)clickedHexPosition.z),
+                out Diamond diamondObject)) return null;
             return diamondObject.GetComponent<Diamond>();
         }
 
@@ -107,7 +113,7 @@ public class PlayerClicker : MonoBehaviour
         Vector2 hexXY = new Vector2(
             euclidPosition.x * 2.0f/3.0f,
             -euclidPosition.x/3.0f + euclidPosition.y * (float)Math.Pow(3, -0.5f)
-        ) / GameObject.FindAnyObjectByType<DiamondGridGenerator>().GetDiamondSize();
+        ) / diamondGrid.GetDiamondSize();
 
         Vector2 hexCorner = new Vector2(
             (float)Math.Floor((double) hexXY.x),

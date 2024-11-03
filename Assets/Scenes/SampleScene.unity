@@ -725,7 +725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5d55f3939ab5ac4caeb4c87cdb4d279, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  diamond: {fileID: 3162658721972350475, guid: ef463e92d9c6bd74eaf91bc05388fa04, type: 3}
+  diamond: {fileID: 4672886212703408775, guid: ef463e92d9c6bd74eaf91bc05388fa04, type: 3}
   gridSize: 6
 --- !u!114 &1547849184
 MonoBehaviour:

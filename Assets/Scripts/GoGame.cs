@@ -13,10 +13,13 @@ public class GoGame : MonoBehaviour
     public int player2score = 0;
     public int player3score = 0;
 
+    DiamondGridGenerator diamondGrid;
+
     void Start()
     {
         GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
         GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
+        diamondGrid = FindObjectOfType<DiamondGridGenerator>();
     }
 
     public bool ValidatePlacement(Diamond diamondToPlace) {
@@ -201,15 +204,11 @@ public class GoGame : MonoBehaviour
         }
         
         foreach (Vector3 surround in surrounding) {
-            GameObject obj = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
-                surround.x, surround.y, surround.z));
-            if (obj == null)
+            if (!diamondGrid.diamonds.TryGetValue(new Vector3Int((int)surround.x, (int)surround.y, (int)surround.z), out Diamond surroundingDiamond))
             {
                 surroundingDiamonds.Add(null);
                 continue;
             }
-                    
-            Diamond surroundingDiamond = obj.GetComponent<Diamond>();
             
             surroundingDiamonds.Add(surroundingDiamond);
         }
