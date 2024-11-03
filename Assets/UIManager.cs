@@ -6,44 +6,59 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Start")]
     [SerializeField] TMP_Text startText;
+
+    [Header("Pass Panel")]
     [SerializeField] GameObject passPanel;
     [SerializeField] Image[] passStatusImages;
     [SerializeField] Image passButtonImage;
     [SerializeField] Color[] playerColors;
     [SerializeField] float passButtonAnimationTime = .2f;
 
+    [Header("Turn Info")]
+    [SerializeField] GameObject turnStatusPanel;
+    [SerializeField] TMP_Text[] turnStatusText;
+
     GoGame game;
 
-    float passButtonAnimationFrame = 0;
-    Color passButtonAnimationStart, passButtonAnimationGoal;
+    float playerColorAnimationFrame = 0;
+    Color playerColorAnimationStart, playerColorAnimationGoal;
 
     void Start()
     {
         game = FindObjectOfType<GoGame>();
 
         passPanel.SetActive(false);
+        turnStatusPanel.SetActive(false);
     }
 
     void Update()
     {
-        if (passButtonAnimationFrame < passButtonAnimationTime)
+        if (playerColorAnimationFrame < passButtonAnimationTime)
         {
-            passButtonAnimationFrame += Time.deltaTime;
-            passButtonImage.color = Color.Lerp(passButtonAnimationStart, passButtonAnimationGoal, passButtonAnimationFrame / passButtonAnimationTime);
-            if (passButtonAnimationFrame >= passButtonAnimationTime)
-                passButtonImage.color = passButtonAnimationGoal;
+            playerColorAnimationFrame += Time.deltaTime;
+
+            Color c = playerColorAnimationFrame >= passButtonAnimationTime ? playerColorAnimationGoal : 
+                Color.Lerp(playerColorAnimationStart, playerColorAnimationGoal, playerColorAnimationFrame / passButtonAnimationTime);
+
+            // Pass button
+            passButtonImage.color = c;
+
+            // Turn status
+            turnStatusText[1].color = c;
         }
     }
 
     public void NewTurn(int player)
     {
+        // Player color animation parameters
+        playerColorAnimationFrame = 0;
+        playerColorAnimationStart = passButtonImage.color;
+        playerColorAnimationGoal = playerColors[player - 1];
+
         // Update pass status
         {
-            passButtonAnimationFrame = 0;
-            passButtonAnimationStart = passButtonImage.color;
-            passButtonAnimationGoal = playerColors[player - 1];
-
             for (int i = 0; i < passStatusImages.Length; i++)
             {
                 Color c = passStatusImages[i].color;
@@ -64,6 +79,12 @@ public class UIManager : MonoBehaviour
                 passStatusImages[i].color = c;
             }
         }
+
+        // Update turn status
+        {
+            foreach (TMP_Text t in turnStatusText)
+                t.text = $"Player {player}'s Turn";
+        }
     }
 
     public void StartGame()
@@ -75,6 +96,7 @@ public class UIManager : MonoBehaviour
 
         startText.enabled = false;
         passPanel.SetActive(true);
+        turnStatusPanel.SetActive(true);
         NewTurn(1);
     }
 
