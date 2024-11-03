@@ -12,20 +12,13 @@ public class PlayerClicker : MonoBehaviour
     private delegate void ClickDelegate(int mouseButton);
     private ClickDelegate clickMethod;
 
-    public delegate bool ClickValidationRequest(Diamond diamond);
-    public event ClickValidationRequest validationRequest;
-
-    public delegate void ValidationFalure(Diamond diamond);
-    public event ValidationFalure validationFail;
-
-    public delegate void ClickProccesser(Diamond diamond);
-    public event ClickProccesser clickProccesser;
-
     DiamondGridGenerator diamondGrid;
+    GoGame game;
 
     void Start()
     {
         diamondGrid = FindObjectOfType<DiamondGridGenerator>();
+        game = FindObjectOfType<GoGame>();
 
         clickMethod = GameActual;
     }
@@ -78,7 +71,9 @@ public class PlayerClicker : MonoBehaviour
         if (mouseButton != 0) return;
         Diamond clickedDiamond = GetClickedDiamond();
 
-        if (validationRequest == null || clickedDiamond == null) return;
+        game.TryPlaceDiamond(clickedDiamond);
+
+        /*if (validationRequest == null || clickedDiamond == null) return;
 
         if (!validationRequest(clickedDiamond)) {
             if (validationFail == null) return;
@@ -86,26 +81,7 @@ public class PlayerClicker : MonoBehaviour
         }
 
         if (clickProccesser == null) return;
-        clickProccesser(clickedDiamond);
-    }
-
-    private void GameTesting(int mouseButton) {
-        Diamond clickedDiamond = GetClickedDiamond();
-
-        switch (mouseButton) {
-            case 0:
-                clickedDiamond.PlaceDiamond(testPlayer);
-            break;
-
-            case 1:
-                clickedDiamond.PlaceDiamond(0);
-            break;
-
-            case 2:                
-                testPlayer++;
-                testPlayer = (testPlayer>3)? 1:testPlayer;
-            break;
-        }
+        clickProccesser(clickedDiamond);*/
     }
 
     // TRANSFORMATION METHODS

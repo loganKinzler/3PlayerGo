@@ -13,169 +13,259 @@ public class GoGame : MonoBehaviour
     public int player2score = 0;
     public int player3score = 0;
 
+    public int turnCount = 0;
+
     DiamondGridGenerator diamondGrid;
 
     void Start()
     {
-        GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
-        GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
         diamondGrid = FindObjectOfType<DiamondGridGenerator>();
     }
 
-    public bool ValidatePlacement(Diamond diamondToPlace) {
-        List<Diamond> surroundingDiamonds = GetSurrounding(diamondToPlace);
-        
+    public bool ValidatePlacement(Diamond diamondToPlace) 
+    {
+        if (diamondToPlace == null)
+            return false;
+
         // CANNOT PLACE TILE ON ANOTHER
-        if (diamondToPlace.player != 0) return false;
+        if (diamondToPlace.player != 0)
+            return false;
 
-        // CHECK IF PREVIOUS MOVES WERE IDENTICLE (LATER)
+        // If player has no pieces, allow them to place anywhere (punishment for the other players ganging up on them
+        if (player == 1 && player1score == 0 ||
+            player == 2 && player2score == 0 ||
+            player == 3 && player3score == 0)
+            return true;
 
-        // TEMPORARILY SET DtP AS IF IT HAD ALREADY BEEN PLACED (RESET BEFORE RETURNING)
-        int prevDiamondPlayer = diamondToPlace.player;
+        // TILE GROUP CAPTURED
+        FloodFillEmptyResult result = FloodFillEmpty(diamondToPlace);
+        if (result != null && !result.PlayerCanPlace(player))
+            return false;
+
+        // WOULD BE CAPTURED
+        // Set diamond to player temporarily
         diamondToPlace.player = player;
+        FloodFillPlayerResult resultPlayer = FloodFillPlayer(diamondToPlace);
+        if (resultPlayer != null && resultPlayer.enclosed)
+        {
+            diamondToPlace.player = 0;
+            return false;
+        }
+        diamondToPlace.player = 0;
 
-        foreach (Diamond surround in surroundingDiamonds) {
+        return true;
+    }
 
-            if (surround == null)
+    // Run flood fill on a group of empty diamonds and get the surrounding diamonds
+    public FloodFillEmptyResult FloodFillEmpty(Diamond startingDiamond)
+    {
+        if (turnCount < 4) // Earliest turn a piece can be captured
+            return null;
+
+        if (startingDiamond.player != 0)
+            return null;
+
+        List<Diamond> group = new List<Diamond>();
+        List<Diamond> surroundingDiamonds = new List<Diamond>();
+        List<int> playersInBorder = new List<int>();
+        List<Diamond> diamondsChecked = new List<Diamond>();
+
+        Queue<Diamond> checkQueue = new Queue<Diamond>();
+        checkQueue.Enqueue(startingDiamond);
+
+        while (checkQueue.Count > 0)
+        {
+            // Get next diamond in queue
+            Diamond diamond = checkQueue.Dequeue();
+
+            if (diamond == null)
                 continue;
 
-            // ADJCENT TILE IS BLANK (ALWAYS VALID)
-            if (surround.player == 0) {
-                diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-                return true;
-            }
-            
-            // ADJACENT TILE IS ANOTHER PLAYER'S (NOT ENOUGH INFORMATION TO WORK WITH)
-            if (surround.player != diamondToPlace.player) continue;
-            
-            // ADJACENT TILE IS THE PLAYER'S (CHECK IF PLACING CURRENT TILE WILL CAUSE THE GROUP TO BE TAKEN)
-            if (surround.player == diamondToPlace.player) {
+            // Check if solid
+            if (diamond.player != 0) // Solid
+            {
+                // Add player to playersInBorder
+                if (!playersInBorder.Contains(diamond.player))
+                    playersInBorder.Add(diamond.player);
 
-                // FULL GROUP IS SURROUNDED (GROUP WILL BE TAKEN)
-                FloodFillInfo floodFromSurround = FloodFill(surround);
-                if (GroupIsCompletelySurrounded(floodFromSurround.surrounding)) {
-                    diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-                    return false;
+                // Check if group contains all 3 players. If so, it is not enclosed -> return
+                if (playersInBorder.Count >= 3)
+                    return new FloodFillEmptyResult(false);
+
+                // Add to surrounding
+                surroundingDiamonds.Add(diamond);
+            }
+            else // Not Solid
+            {
+                group.Add(diamond);
+
+                // Add surrounding diamonds to queue
+                List<Diamond> surrounding = GetSurrounding(diamond);
+                foreach (Diamond d in surrounding)
+                {
+                    if (!diamondsChecked.Contains(d))
+                    {
+                        checkQueue.Enqueue(d);
+                        diamondsChecked.Add(d);
+                    }
                 }
-                
-                // AN EMPTY SPACE SOMEWHERE (GROUP IS FINE)
-                diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-                return true;
-            }
-        }
-        
-        // CORNER CASE (PLACED IN CORNER ALONE, BUT SURROUNDED [WILL GET TAKEN])
-        diamondToPlace.player = prevDiamondPlayer;// RESET DtP
-        return false;
-    }
-
-    public void ValidationFailure(Diamond diamond) {
-        print(string.Format("Failed to Place Diamond at:{0}", diamond.GetPosition()));
-    }
-
-    public void ClickProccesser(Diamond diamond) {
-        diamond.PlaceDiamond(player);
-        int scoreAddition = 1;
-
-        List<Diamond> surrounding = GetSurrounding(diamond);
-        foreach (Diamond surround in surrounding) {
-
-            // TILE IS EMPTY OR PLAYER'S (DO NOTHING [VAIDATION ALREAYD RAN, SO NO ISSUES WITH CAPTURING SELF])
-            if (surround == null || surround.player == diamond.player || surround.player == 0) continue;
-            FloodFillInfo floodInfo = FloodFill(surround);
-
-            // GROUP IS NOT ENCLOSED (DO NOTHING)
-            if (!GroupIsCompletelySurrounded(floodInfo.surrounding)) continue;
-
-            // REMOVE THE ENCLOSED GROUP
-            foreach (Diamond floodedDiamond in floodInfo.previouslySearched)
-                floodedDiamond.PlaceDiamond(0);
-            
-            // ADD TAKEN TILES TO PLAYER'S SCORE
-            scoreAddition += floodInfo.previouslySearched.Count;
-
-            // REMOVE SCORE OF TAKEN TILES
-            switch (surround.player) {
-                case 1:
-                    player1score -= scoreAddition;
-                break;
-
-                case 2:
-                    player2score -= scoreAddition;
-                break;
-
-                case 3:
-                    player3score -= scoreAddition;
-                break;
             }
         }
 
-        // ADD SCORE TO CORRECT PLAYER
-        switch (player) {
-            case 1:
-                player1score += scoreAddition;
-            break;
+        return new FloodFillEmptyResult(true, group, surroundingDiamonds);
+    }
 
-            case 2:
-                player2score += scoreAddition;
-            break;
+    // Run flood fill on a group of a player's diamonds to see if it's captuerd
+    public FloodFillPlayerResult FloodFillPlayer(Diamond startingDiamond)
+    {
+        if (turnCount < 4) // Earliest turn a capture can happen on is 5
+            return null;
 
-            case 3:
-                player3score += scoreAddition;
-            break;
-        }    
+        int player = startingDiamond.player;
+        if (player == 0)
+            return null;
 
+        List<Diamond> group = new List<Diamond>();
+        List<Diamond> diamondsChecked = new List<Diamond>();
+
+        Queue<Diamond> checkQueue = new Queue<Diamond>();
+        checkQueue.Enqueue(startingDiamond);
+
+        while (checkQueue.Count > 0)
+        {
+            // Get next diamond in queue
+            Diamond diamond = checkQueue.Dequeue();
+
+            if (diamond == null)
+                continue;
+
+            // Check if empty
+            if (diamond.player == 0) // Empty
+            {
+                // Player is not enclosed, return
+                return new FloodFillPlayerResult(false);
+            }
+
+            // Check if player's
+            if (diamond.player == player) // Player's piece
+            {
+                group.Add(diamond);
+
+                // Add surrounding diamonds to queue
+                List<Diamond> surrounding = GetSurrounding(diamond);
+                foreach (Diamond d in surrounding)
+                {
+                    if (!diamondsChecked.Contains(d))
+                    {
+                        checkQueue.Enqueue(d);
+                        diamondsChecked.Add(d);
+                    }
+                }
+            }
+        }
+
+        return new FloodFillPlayerResult(true, group);
+    }
+
+    public void TryPlaceDiamond(Diamond diamond)
+    {
+        // Check if piece can be placed
+        if (!ValidatePlacement(diamond))
+            return;
+
+        // Set piece
+        diamond.PlaceDiamond(player, 0, turnCount);
+
+        // Capture groups if possible
+        List<Diamond> surroundingDiamonds = GetSurrounding(diamond);
+        foreach (Diamond d in surroundingDiamonds)
+        {
+            if (d == null)
+                continue;
+
+            if (d.player == 0)
+                continue;
+
+            FloodFillPlayerResult result = FloodFillPlayer(d);
+            if (result != null && result.enclosed)
+                result.CaptureGroup(player, turnCount);
+        }
+
+        // End turn
+        UpdateScores();
         IteratePlayer();
+    }
+
+    public void UpdateScores()
+    {
+        player1score = 0;
+        player2score = 0;
+        player3score = 0;
+
+        List<Diamond> diamondsChecked = new List<Diamond>();
+
+        foreach (KeyValuePair<Vector3Int, Diamond> entry in diamondGrid.diamonds)
+        {
+            Diamond diamond = entry.Value;
+
+            if (diamondsChecked.Contains(diamond))
+                continue;
+
+            diamondsChecked.Add(diamond);
+
+            switch (diamond.player)
+            {
+                // Add score to player who's tile it is
+                case 1:
+                    player1score++;
+                    break;
+                case 2:
+                    player2score++;
+                    break;
+                case 3:
+                    player3score++;
+                    break;
+
+                // Empty spaces scored differently
+                case 0:
+                    // Add score based on empty pieces owned by player
+                    FloodFillEmptyResult result = FloodFillEmpty(diamond);
+                    if (result == null || !result.enclosed)
+                    {
+                        if (diamond.playerOwned != 0)
+                            diamond.PlaceDiamond(0, 0, turnCount);
+                        continue;
+                    }
+
+                    result.SetVisuals();
+                    switch (result.GetPlayerOwned())
+                    {
+                        case 1:
+                            player1score += result.emptyDiamonds.Count;
+                            break;
+                        case 2:
+                            player2score += result.emptyDiamonds.Count;
+                            break;
+                        case 3:
+                            player3score += result.emptyDiamonds.Count;
+                            break;
+
+                    }
+
+                    // Add all empty pieces to checked list
+                    foreach (Diamond d in result.emptyDiamonds)
+                        diamondsChecked.Add(d);
+                    break;
+            }
+        }
     }
 
     public void IteratePlayer() {
         player++;
+        turnCount++;
         player = (player>3)? 1:player;
 
         scoreChart.CreatePieChart(player1score, player2score, player3score);
-    }
-
-    public FloodFillInfo FloodFill(Diamond startingDiamond) {
-
-        FloodFillInfo FFinfo = ScriptableObject.CreateInstance<FloodFillInfo>();
-        FFinfo.player = startingDiamond.player;
-        FFinfo.previouslySearched = new List<Diamond>(){startingDiamond};
-        FFinfo.surrounding = GetSurrounding(startingDiamond);
-
-        int limit = 100;
-        int iter = 0;
-
-        bool hasExpanded = true;
-        while (hasExpanded && iter < limit) {
-            hasExpanded = false;
-            iter++;
-
-            for (int sd=FFinfo.surrounding.Count-1; sd>=0; sd--) {
-                
-                // WALL IS FORMED
-                if (FFinfo.surrounding[sd] == null || FFinfo.surrounding[sd].player != FFinfo.player) continue;
-                hasExpanded = true;
-
-                // EXPAND WHERE IT CAN
-                List<Diamond> expansion = GetSurrounding(FFinfo.surrounding[sd]);
-                for (int ed=expansion.Count-1; ed>=0; ed--) {
-                    if (!FFinfo.previouslySearched.Contains(expansion[ed]) && !FFinfo.surrounding.Contains(expansion[ed])) continue;
-                    expansion.RemoveAt(ed);
-                }
-
-                // REMOVE THE TILE THAT WAS EXPANDED OFF OF & ADD NEW EXPANSION
-                FFinfo.previouslySearched.Add(FFinfo.surrounding[sd]);
-                FFinfo.surrounding.AddRange<Diamond>(expansion);
-            }
-        }
-
-        return FFinfo;
-    }
-
-    public bool GroupIsCompletelySurrounded(List<Diamond> surroundsGroup) {
-        foreach (Diamond diamond in surroundsGroup)
-            if (diamond == null || diamond.player == 0) return false;
-        return true;
     }
 
     public List<Diamond> GetSurrounding(Diamond diamond) {

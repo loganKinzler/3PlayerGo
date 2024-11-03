@@ -48,9 +48,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: 0
+  playerOwned: 0
+  turnPlaced: 0
   player1SpriteSheet: {fileID: 2800000, guid: d40e82a308fe9fe49902acb190d57e28, type: 3}
   player2SpriteSheet: {fileID: 2800000, guid: 42493e6dd9ed3fd4c80f5eb77a4d5e9b, type: 3}
   player3SpriteSheet: {fileID: 2800000, guid: dae4c1bc218c98c4f8bb6f3b174d6c6a, type: 3}
+  player1OwnedTexture: {fileID: 2800000, guid: b13c2fffedb24a6469dc62c68bb7e4d5, type: 3}
+  player2OwnedTexture: {fileID: 2800000, guid: c296b02067159b34cbb4bd8c64a75bd4, type: 3}
+  player3OwnedTexture: {fileID: 2800000, guid: 77b766430ff78704288d7c79a72ef1ca, type: 3}
   nullSprite: {fileID: 2800000, guid: 15ac947e65694964c8e5bca9cf1accc3, type: 3}
 --- !u!23 &3134002938201376707
 MeshRenderer:

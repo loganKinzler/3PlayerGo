@@ -8,9 +8,14 @@ public class Diamond : MonoBehaviour
 
     // DIAMOND VARS
     public int player = 0;
+    public int playerOwned = 0; // If null but surrounded
+    public int turnPlaced = 0;
     public Texture player1SpriteSheet;
     public Texture player2SpriteSheet;
     public Texture player3SpriteSheet;
+    public Texture player1OwnedTexture;
+    public Texture player2OwnedTexture;
+    public Texture player3OwnedTexture;
     public Texture nullSprite;
 
     private Vector3 diamondPosition = new Vector3(0,0,0);
@@ -24,19 +29,19 @@ public class Diamond : MonoBehaviour
 
     public void InstantiateDiamond() {
         SetPosition(0,0,0);
-        PlaceDiamond(0);
+        PlaceDiamond(0, 0, 0);
         CreateDiamondMesh();
     }
 
     public void InstantiateDiamond(int x, int y, int z) {
         SetPosition(x, y, z);
-        PlaceDiamond(0);
+        PlaceDiamond(0, 0, 0);
         CreateDiamondMesh();
     }
 
     public void InstantiateDiamond(Vector3 vect) {
         SetPosition((int) vect.x, (int) vect.y, (int) vect.z);
-        PlaceDiamond(0);
+        PlaceDiamond(0, 0, 0);
         CreateDiamondMesh();
     }
 
@@ -56,12 +61,28 @@ public class Diamond : MonoBehaviour
         transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * GetEuclideanRotation(newPosition));
     }
 
-    public void PlaceDiamond(int newPlayer) {
+    public void PlaceDiamond(int newPlayer, int newPlayerOwned, int turn) {
         player = newPlayer%4;
+        playerOwned = newPlayerOwned;
+        turnPlaced = turn;
 
         switch (player) {
             case 0:
-                GetComponent<MeshRenderer>().material.mainTexture = nullSprite;
+                switch (playerOwned)
+                {
+                    case 0:
+                        GetComponent<MeshRenderer>().material.mainTexture = nullSprite;
+                        break;
+                    case 1:
+                        GetComponent<MeshRenderer>().material.mainTexture = player1OwnedTexture;
+                        break;
+                    case 2:
+                        GetComponent<MeshRenderer>().material.mainTexture = player2OwnedTexture;
+                        break;
+                    case 3:
+                        GetComponent<MeshRenderer>().material.mainTexture = player3OwnedTexture;
+                        break;
+                }
             break;
 
             case 1:
