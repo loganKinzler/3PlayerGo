@@ -36,6 +36,9 @@ public class GoGame : MonoBehaviour
 
         foreach (Diamond surround in surroundingDiamonds) {
 
+            if (surround == null)
+                continue;
+
             // ADJCENT TILE IS BLANK (ALWAYS VALID)
             if (surround.player == 0) {
                 diamondToPlace.player = prevDiamondPlayer;// RESET DtP
