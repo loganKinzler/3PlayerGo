@@ -201,12 +201,12 @@ public class GoGame : MonoBehaviour
         }
         
         foreach (Vector3 surround in surrounding) {
-            if (GameObject.Find(string.Format("Diamond:({0},{1},{2})",
-                surround.x, surround.y, surround.z)).GetComponent<Diamond>() == null)
+            GameObject obj = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
+                surround.x, surround.y, surround.z));
+            if (obj == null)
                     continue;
                     
-            Diamond surroundingDiamond = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
-                surround.x, surround.y, surround.z)).GetComponent<Diamond>();
+            Diamond surroundingDiamond = obj.GetComponent<Diamond>();
             
             surroundingDiamonds.Add(surroundingDiamond);
         }
