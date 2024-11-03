@@ -20,6 +20,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject turnStatusPanel;
     [SerializeField] TMP_Text[] turnStatusText;
 
+    [Header("Score")]
+    [SerializeField] TMP_Text[] scoreFront, scoreBack;
+
     GoGame game;
 
     float playerColorAnimationFrame = 0;
@@ -84,6 +87,18 @@ public class UIManager : MonoBehaviour
         {
             foreach (TMP_Text t in turnStatusText)
                 t.text = $"Player {player}'s Turn";
+        }
+
+        // Update score
+        {
+            scoreFront[0].text = $"Player 1: {game.player1score}";
+            scoreBack[0].text = $"Player 1: {game.player1score}";
+
+            scoreFront[1].text = $"Player 2: {game.player2score}";
+            scoreBack[1].text = $"Player 2: {game.player2score}";
+
+            scoreFront[2].text = $"Player 3: {game.player3score}";
+            scoreBack[2].text = $"Player 3: {game.player3score}";
         }
     }
 
