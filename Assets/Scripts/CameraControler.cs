@@ -14,31 +14,42 @@ public class CameraControler : MonoBehaviour
             -100*Input.GetAxisRaw("Mouse ScrollWheel")
         );
 
-        gameObject.transform.position += (movement - movement.z * Vector3.forward) * Time.deltaTime * speed;
-        gameObject.GetComponent<Camera>().orthographicSize += movement.z * Time.deltaTime * speed;
+        transform.position += (movement - movement.z * Vector3.forward) * Time.deltaTime * speed;
+        GetComponent<Camera>().orthographicSize += movement.z * Time.deltaTime * speed;
 
         KeepCameraInBounds();
 
     }
 
     private void KeepCameraInBounds() {
-        gameObject.GetComponent<Camera>().orthographicSize = Mathf.Clamp(gameObject.GetComponent<Camera>().orthographicSize, 1,5);
-        if (gameObject.GetComponent<Camera>().orthographicSize == 5) {
-            gameObject.transform.position = new Vector3(0,0,-10);
+        GetComponent<Camera>().orthographicSize = Mathf.Clamp(GetComponent<Camera>().orthographicSize, 1,5);
+        if (GetComponent<Camera>().orthographicSize == 5) {
+            transform.position = new Vector3(0,0,-10);
             return;
         }
 
-        gameObject.transform.position = new Vector3(
-            Mathf.Clamp(gameObject.transform.position.x,
-                -(4.75f-gameObject.GetComponent<Camera>().orthographicSize),
-                4.75f-gameObject.GetComponent<Camera>().orthographicSize * Screen.width / Screen.height / 2
-            ),
-            Mathf.Clamp(gameObject.transform.position.y,
-                -(4.75f-gameObject.GetComponent<Camera>().orthographicSize / 2),
-                4.75f-gameObject.GetComponent<Camera>().orthographicSize * Screen.width / Screen.height / 2
-            ),
-            -10
-        );
+        // Get X position
+        float minX = -(4.75f - GetComponent<Camera>().orthographicSize);
+        float maxX = 4.75f - GetComponent<Camera>().orthographicSize * Screen.width / Screen.height / 2;
 
+        float posX;
+        if (minX > maxX)
+            posX = 0;
+        else
+            posX = Mathf.Clamp(gameObject.transform.position.x, minX, maxX);
+
+        // Get Y position
+        float minY = -(4.75f - GetComponent<Camera>().orthographicSize / 2);
+        float maxY = 4.75f - GetComponent<Camera>().orthographicSize * Screen.width / Screen.height / 2;
+
+        float posY;
+        if (minY > maxY)
+            posY = 0;
+        else
+            posY = Mathf.Clamp(transform.position.y, minY, maxY);
+
+
+        // Set position
+        transform.position = new Vector3(posX, posY, -10);
     }
 }
