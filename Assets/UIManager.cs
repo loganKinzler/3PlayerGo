@@ -34,6 +34,7 @@ public class UIManager : MonoBehaviour
 
         passPanel.SetActive(false);
         turnStatusPanel.SetActive(false);
+        UpdateScore();
     }
 
     void Update()
@@ -90,17 +91,20 @@ public class UIManager : MonoBehaviour
         }
 
         // Update score
-        {
-            scoreFront[0].text = $"Player 1: {game.player1score}";
-            scoreBack[0].text = $"Player 1: {game.player1score}";
-
-            scoreFront[1].text = $"Player 2: {game.player2score}";
-            scoreBack[1].text = $"Player 2: {game.player2score}";
-
-            scoreFront[2].text = $"Player 3: {game.player3score}";
-            scoreBack[2].text = $"Player 3: {game.player3score}";
-        }
+        UpdateScore();
     }
+
+    void UpdateScore()
+    {
+            scoreFront[0].text = $"Green | {game.player1score}";
+            scoreBack[0].text = $"Green | {game.player1score}";
+
+            scoreFront[1].text = $"Blue | {game.player2score}";
+            scoreBack[1].text = $"Blue | {game.player2score}";
+
+            scoreFront[2].text = $"Magenta | {game.player3score}";
+            scoreBack[2].text = $"Magenta | {game.player3score}";
+        }
 
     public void StartGame()
     {
@@ -128,7 +132,7 @@ public class UIManager : MonoBehaviour
         // Update turn status
         {
             foreach (TMP_Text t in turnStatusText)
-                t.text = $"Player {playerWon} Wins!";
+                t.text = $"Player {playerWon} Wins!!!!";
         }
 
         // Player color animation parameters
