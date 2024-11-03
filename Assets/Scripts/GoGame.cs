@@ -14,8 +14,8 @@ public class GoGame : MonoBehaviour
 
     void Start()
     {
-        GameObject.Find("Background").GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
-        GameObject.Find("Background").GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
+        GetComponent<PlayerClicker>().validationRequest += ValidatePlacement;
+        GetComponent<PlayerClicker>().clickProccesser += ClickProccesser;
     }
 
     public bool ValidatePlacement(Diamond diamondToPlace) {
