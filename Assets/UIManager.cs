@@ -23,6 +23,9 @@ public class UIManager : MonoBehaviour
     [Header("Score")]
     [SerializeField] TMP_Text[] scoreFront, scoreBack;
 
+    [Header("Screen Border")]
+    [SerializeField] Image screenBorder;
+
     GoGame game;
 
     float playerColorAnimationFrame = 0;
@@ -50,6 +53,9 @@ public class UIManager : MonoBehaviour
 
             // Turn status
             turnStatusText[1].color = c;
+
+            // Border
+            screenBorder.color = c;
         }
     }
 
