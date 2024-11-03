@@ -119,4 +119,21 @@ public class UIManager : MonoBehaviour
     {
         game.PassPlayer();
     }
+
+    public void GameEnd(int playerWon)
+    {
+        startText.enabled = true;
+        passPanel.SetActive(false);
+        
+        // Update turn status
+        {
+            foreach (TMP_Text t in turnStatusText)
+                t.text = $"Player {playerWon} Wins!";
+        }
+
+        // Player color animation parameters
+        playerColorAnimationFrame = 0;
+        playerColorAnimationStart = passButtonImage.color;
+        playerColorAnimationGoal = playerColors[playerWon - 1];
+    }
 }

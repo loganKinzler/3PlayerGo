@@ -287,9 +287,27 @@ public class GoGame : MonoBehaviour
 
     public void IteratePlayer() 
     {
-        // TODO: End game if all players passed
+        // End game if all players passed
         if (player1Passed && player2Passed && player3Passed)
-            Debug.Log("Game over");
+        {
+            gameStarted = false;
+            int playerWon;
+            if (player1score > player2score)
+            {
+                if (player1score > player3score)
+                    playerWon = 1;
+                else
+                    playerWon = 3;
+            }
+            else if (player2score > player3score)
+                playerWon = 2;
+            else
+                playerWon = 3;
+
+            ui.NewTurn(player);
+            FindObjectOfType<UIManager>().GameEnd(playerWon);
+            return;
+        }
 
         player++;
         turnCount++;
