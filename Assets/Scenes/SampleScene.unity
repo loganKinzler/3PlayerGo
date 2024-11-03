@@ -570,6 +570,8 @@ MonoBehaviour:
   chartPoints: 100
   chartRadius: 2
   backgroundRadius: 2.1
+  edgePadding: 0.5
+  leftSideLimit: 4.25
   backgroundMeshFilter: {fileID: 603052455}
 --- !u!4 &1259443619
 Transform:
@@ -724,6 +726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 680e94e5c4b557e40b912cec86eabbf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreChart: {fileID: 1259443618}
   player: 1
   player1score: 0
   player2score: 0

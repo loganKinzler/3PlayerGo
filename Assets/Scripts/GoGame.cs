@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class GoGame : MonoBehaviour
 {
+    [SerializeField] PieChart scoreChart;
 
     // add scores up here and add functionality for them
     public int player = 1;
@@ -124,6 +125,8 @@ public class GoGame : MonoBehaviour
     public void IteratePlayer() {
         player++;
         player = (player>3)? 1:player;
+
+        scoreChart.CreatePieChart(player1score, player2score, player3score);
     }
 
     public FloodFillInfo FloodFill(Diamond startingDiamond) {

@@ -9,12 +9,32 @@ public class PieChart : MonoBehaviour
     [SerializeField] int chartPoints;
     [SerializeField] float chartRadius;
     [SerializeField] float backgroundRadius;
+    [SerializeField] float edgePadding = 0.5f;
+    [SerializeField] float leftSideLimit = 4.25f;
 
     [SerializeField] MeshFilter backgroundMeshFilter;
 
-    private void Start()
+    float scaledChartRadius, scaledBackgroundRadius;
+    float oldScreenWidth = 0;
+
+    void Update()
     {
-        CreatePieChart(10, 12, 15);
+        if (Screen.width != oldScreenWidth)
+        {
+            // Calculate position
+            float chartPercent = chartRadius / backgroundRadius;
+            float screenEdge = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x;
+            float chartRightX = screenEdge - edgePadding;
+            float xPos = (chartRightX + leftSideLimit) / 2f;
+            scaledBackgroundRadius = Mathf.Min((chartRightX - leftSideLimit) / 2f, chartRadius);
+            scaledChartRadius = scaledBackgroundRadius * chartPercent;
+
+            transform.position = new Vector3(xPos, transform.position.y, transform.position.z);
+
+            GoGame go = FindObjectOfType<GoGame>();
+            CreatePieChart(go.player1score, go.player2score, go.player3score);
+            oldScreenWidth = Screen.width;
+        }
     }
 
     public void CreatePieChart(int player1Score, int player2Score, int player3Score)
@@ -48,8 +68,8 @@ public class PieChart : MonoBehaviour
 
             // Calculate point position
             float angle = (2 * Mathf.PI * i) / chartPoints;
-            float x = chartRadius * Mathf.Cos(angle);
-            float y = chartRadius * Mathf.Sin(angle);
+            float x = scaledChartRadius * Mathf.Cos(angle);
+            float y = scaledChartRadius * Mathf.Sin(angle);
 
             // Add vertices and indices
             vertices.Add(new Vector3(x, y, 0));
@@ -74,8 +94,8 @@ public class PieChart : MonoBehaviour
             vertCount++;
 
             // Create background vertices and indices
-            float bx = backgroundRadius * Mathf.Cos(angle);
-            float by = backgroundRadius * Mathf.Sin(angle);
+            float bx = scaledBackgroundRadius * Mathf.Cos(angle);
+            float by = scaledBackgroundRadius * Mathf.Sin(angle);
             verticesBack.Add(new Vector3(bx, by, 1));
             indicesBack.Add(0);
             indicesBack.Add(vertCount - 1);
