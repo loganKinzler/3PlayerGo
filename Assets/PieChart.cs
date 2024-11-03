@@ -103,14 +103,17 @@ public class PieChart : MonoBehaviour
         }
 
         // Create main mesh
-        Mesh mesh = new Mesh();
-        mesh.subMeshCount = 3;
-        mesh.vertices = vertices.ToArray();
-        mesh.SetTriangles(indicesP1.ToArray(), 0);
-        mesh.SetTriangles(indicesP2.ToArray(), 1);
-        mesh.SetTriangles(indicesP3.ToArray(), 2);
-        mesh.RecalculateBounds();
-        GetComponent<MeshFilter>().mesh = mesh;
+        if (player1Score > 0 || player2Score > 0 || player3Score > 0)
+        {
+            Mesh mesh = new Mesh();
+            mesh.subMeshCount = 3;
+            mesh.vertices = vertices.ToArray();
+            mesh.SetTriangles(indicesP1.ToArray(), 0);
+            mesh.SetTriangles(indicesP2.ToArray(), 1);
+            mesh.SetTriangles(indicesP3.ToArray(), 2);
+            mesh.RecalculateBounds();
+            GetComponent<MeshFilter>().mesh = mesh;
+        }
 
         // Create background mesh
         Mesh backMesh = new Mesh();
