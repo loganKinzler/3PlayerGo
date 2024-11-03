@@ -75,7 +75,7 @@ public class GoGame : MonoBehaviour
         foreach (Diamond surround in surrounding) {
 
             // TILE IS EMPTY OR PLAYER'S (DO NOTHING [VAIDATION ALREAYD RAN, SO NO ISSUES WITH CAPTURING SELF])
-            if (surround.player == diamond.player || surround.player == 0) continue;
+            if (surround == null || surround.player == diamond.player || surround.player == 0) continue;
             FloodFillInfo floodInfo = FloodFill(surround);
 
             // GROUP IS NOT ENCLOSED (DO NOTHING)
@@ -147,7 +147,7 @@ public class GoGame : MonoBehaviour
             for (int sd=FFinfo.surrounding.Count-1; sd>=0; sd--) {
                 
                 // WALL IS FORMED
-                if (FFinfo.surrounding[sd].player != FFinfo.player) continue;
+                if (FFinfo.surrounding[sd] == null || FFinfo.surrounding[sd].player != FFinfo.player) continue;
                 hasExpanded = true;
 
                 // EXPAND WHERE IT CAN
@@ -168,7 +168,7 @@ public class GoGame : MonoBehaviour
 
     public bool GroupIsCompletelySurrounded(List<Diamond> surroundsGroup) {
         foreach (Diamond diamond in surroundsGroup)
-            if (diamond.player == 0) return false;
+            if (diamond == null || diamond.player == 0) return false;
         return true;
     }
 
@@ -204,7 +204,10 @@ public class GoGame : MonoBehaviour
             GameObject obj = GameObject.Find(string.Format("Diamond:({0},{1},{2})",
                 surround.x, surround.y, surround.z));
             if (obj == null)
-                    continue;
+            {
+                surroundingDiamonds.Add(null);
+                continue;
+            }
                     
             Diamond surroundingDiamond = obj.GetComponent<Diamond>();
             
