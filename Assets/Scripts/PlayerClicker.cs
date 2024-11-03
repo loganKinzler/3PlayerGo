@@ -25,6 +25,9 @@ public class PlayerClicker : MonoBehaviour
 
     void Update()
     {
+        if (!game.gameStarted)
+            return;
+
         if (Input.GetMouseButtonUp(0) && !clickDebounce) {
             clickDebounce = true;
             StartCoroutine(MouseCoroutine(0, clickMethod));

@@ -13,6 +13,7 @@ public class GoGame : MonoBehaviour
     public int player2score = 0;
     public int player3score = 0;
 
+    public bool gameStarted = false;
     public int turnCount = 0;
 
     DiamondGridGenerator diamondGrid;
@@ -307,5 +308,23 @@ public class GoGame : MonoBehaviour
         }
 
         return surroundingDiamonds;
+    }
+
+    public void StartGame()
+    {
+        // Reset everything
+        foreach (KeyValuePair<Vector3Int, Diamond> pair in diamondGrid.diamonds)
+        {
+            pair.Value.PlaceDiamond(0, 0, 0);
+        }
+        turnCount = 0;
+        player = 1;
+        player1score = 0;
+        player2score = 0;
+        player3score = 0;
+        scoreChart.CreatePieChart(0, 0, 0);
+
+        // Allow for input
+        gameStarted = true;
     }
 }
